@@ -13,6 +13,7 @@ var CLIENTS = make(map[string]*websocket.Conn)
 var UPGRADER = websocket.Upgrader{
 	ReadBufferSize: 1024,
 	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
