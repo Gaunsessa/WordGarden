@@ -8,6 +8,7 @@ import (
 )
 
 type Player struct {
+	sx int
 	x, y int
 	timeout float32
 }
@@ -17,7 +18,11 @@ var IP string
 
 var CANVAS = NewCanvas("garden")
 var GARDEN = NewGarden(*CANVAS, "ws://" + IP + ":" + PORT + "/ws")
-var PLAYER = Player{ rand.Int() % CANVAS.width, rand.Int() % CANVAS.height, 3.0 }
+var PLAYER = Player{ 
+	x: rand.Int() % CANVAS.width, 
+	y: rand.Int() % CANVAS.height, 
+	timeout: 3.0,
+}
 
 func update(this js.Value, inputs []js.Value) interface{} {
 	dt := GetDeltaTime()
@@ -31,6 +36,8 @@ func update(this js.Value, inputs []js.Value) interface{} {
 
 		PLAYER.x = rand.Int() % CANVAS.width
 		PLAYER.y = rand.Int() % CANVAS.height
+
+		PLAYER.sx = PLAYER.x
 	}
 
 	GARDEN.Update(dt)
@@ -45,10 +52,15 @@ func update(this js.Value, inputs []js.Value) interface{} {
 func keyPressCb(this js.Value, inputs []js.Value) interface{} {
 	key := inputs[0].Get("key").String()
 
-	GARDEN.PutText(key, PLAYER.x, PLAYER.y)
+	if key == "Enter" {
+		PLAYER.y += CANVAS.charSize
+		PLAYER.x = PLAYER.sx
+	} else {
+		GARDEN.PutText(key, PLAYER.x, PLAYER.y)
+		PLAYER.x += CHAR_PIXEL_WIDTH
+	}
 
 	PLAYER.timeout = 3.0
-	PLAYER.x += int(float32(CANVAS.charSize) / 1.5)
 
 	return nil
 }
@@ -75,6 +87,7 @@ func pasteCb(this js.Value, inputs []js.Value) interface{} {
 func main() {
 	rand.Seed(time.Now().Unix())
 
+	PLAYER.sx = PLAYER.x
 	CHAR_PIXEL_WIDTH = int(float32(CANVAS.charSize) / 1.5)
 
 	js.Global().Call("addEventListener", "keypress", js.FuncOf(keyPressCb))
