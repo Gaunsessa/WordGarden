@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"syscall/js"
 )
 
@@ -10,19 +11,21 @@ type Canvas struct {
 	ctx js.Value
 
 	width, height int
+	charSize int
 }
 
 func NewCanvas(id string) *Canvas {
 	element := getElement(id)
 	ctx     := element.Call("getContext", "2d")
 
-	ctx.Set("font", "30px monospace")
+	ctx.Set("font", fmt.Sprintf("%dpx monospace", element.Get("width").Int() / CHAR_WIDTH))
 
 	return &Canvas{
 		element: element,
 		ctx: ctx,
 		width: element.Get("width").Int(),
 		height: element.Get("height").Int(),
+		charSize: element.Get("width").Int() / CHAR_WIDTH,
 	}
 }
 

@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"syscall/js"
 	"time"
+	"unicode/utf8"
 )
 
 type Player struct {
@@ -11,8 +12,11 @@ type Player struct {
 	timeout float32
 }
 
+var PORT string
+var IP string
+
 var CANVAS = NewCanvas("garden")
-var GARDEN = NewGarden(*CANVAS, "ws://localhost:8000/ws")
+var GARDEN = NewGarden(*CANVAS, "ws://" + IP + ":" + PORT + "/ws")
 var PLAYER = Player{ rand.Int() % CANVAS.width, rand.Int() % CANVAS.height, 3.0 }
 
 func update(this js.Value, inputs []js.Value) interface{} {
@@ -44,7 +48,26 @@ func keyPressCb(this js.Value, inputs []js.Value) interface{} {
 	GARDEN.PutText(key, PLAYER.x, PLAYER.y)
 
 	PLAYER.timeout = 3.0
-	PLAYER.x += 20
+	PLAYER.x += int(float32(CANVAS.charSize) / 1.5)
+
+	return nil
+}
+
+func pasteCb(this js.Value, inputs []js.Value) interface{} {
+	var clip js.Value
+
+	wData := js.Global().Get("clipboardData")
+	if !wData.IsUndefined() { clip = wData }
+
+	eData := inputs[0].Get("clipboardData")
+	if !eData.IsUndefined() { clip = eData }
+
+	data := clip.Call("getData", "text").String()
+
+	GARDEN.PutText(data, PLAYER.x, PLAYER.y)
+
+	PLAYER.timeout = 3.0
+	PLAYER.x += CHAR_PIXEL_WIDTH * utf8.RuneCountInString(data)
 
 	return nil
 }
@@ -52,11 +75,13 @@ func keyPressCb(this js.Value, inputs []js.Value) interface{} {
 func main() {
 	rand.Seed(time.Now().Unix())
 
+	CHAR_PIXEL_WIDTH = int(float32(CANVAS.charSize) / 1.5)
+
 	js.Global().Call("addEventListener", "keypress", js.FuncOf(keyPressCb))
+	js.Global().Call("addEventListener", "paste", js.FuncOf(pasteCb))
 
 	js.Global().Call("requestAnimationFrame", js.FuncOf(update))
 
 	loop := make(chan bool)
 	<-loop
-
 }

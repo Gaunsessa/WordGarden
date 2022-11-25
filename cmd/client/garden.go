@@ -31,18 +31,18 @@ func NewGarden(canvas Canvas, ws string) *Garden {
 		msg := strings.Split(inputs[0].Get("data").String(), "|")
 		if len(msg) != 3 { return nil }
 
-		x, err := strconv.Atoi(msg[0])
+		x, err := strconv.ParseFloat(msg[0], 32)
 		if err != nil { return nil }
 
-		y, err := strconv.Atoi(msg[1])
+		y, err := strconv.ParseFloat(msg[1], 32)
 		if err != nil { return nil }
 
 		for i, c := range msg[2] {
 			g.chars = append(g.chars, Character{
 				char: c,
 				alpha: 0xFF,
-				x: x + i * 20,
-				y: y,
+				x: int(float64(g.canvas.width) * x) + i * CHAR_PIXEL_WIDTH,
+				y: int(float64(g.canvas.height) * y),
 			})
 		}
 
@@ -55,13 +55,13 @@ func NewGarden(canvas Canvas, ws string) *Garden {
 }
 
 func (g *Garden) PutText(txt string, x, y int) {
-	g.ws.Call("send", fmt.Sprintf("%d|%d|%s", x, y, txt))
+	g.ws.Call("send", fmt.Sprintf("%f|%f|%s", float32(x) / float32(g.canvas.width), float32(y) / float32(g.canvas.height), txt))
 
 	for i, c := range txt {
 		g.chars = append(g.chars, Character{
 			char: c,
 			alpha: 0xFF,
-			x: x + i * 20,
+			x: x + i * CHAR_PIXEL_WIDTH,
 			y: y,
 		})
 	}
@@ -71,7 +71,7 @@ func (g *Garden) Update(dt float32) {
 	for i := 0; i < len(g.chars); i++ {
 		g.chars[i].alpha -= 0x88 * dt
 
-		if g.chars[i].alpha <= 0 {
+		if g.chars[i].alpha <= 0x11 {
 			g.chars = append(g.chars[:i], g.chars[i + 1:]...)
 
 			i--

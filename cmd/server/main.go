@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 
-	"github.com/gorilla/websocket"
 	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 )
 
 var CLIENTS = make(map[string]*websocket.Conn)
@@ -48,7 +49,7 @@ func main() {
 	http.HandleFunc("/ws", wsHandler);
 	http.Handle("/", http.FileServer(http.Dir("../../assets")))
 
-	err := http.ListenAndServe("0.0.0.0:8000", nil)
+	err := http.ListenAndServe("0.0.0.0:" + os.Getenv("PORT"), nil)
 
 	if err != nil {
 		fmt.Println("Server failed to start!")
