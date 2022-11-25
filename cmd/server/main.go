@@ -16,7 +16,13 @@ var UPGRADER = websocket.Upgrader{
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
-	conn, _ := UPGRADER.Upgrade(w, r, nil)
+	conn, err := UPGRADER.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Println(err)
+
+		return
+	}
+
 	id := uuid.New().String()
 
 	CLIENTS[id] = conn
@@ -41,7 +47,7 @@ func main() {
 	http.HandleFunc("/ws", wsHandler);
 	http.Handle("/", http.FileServer(http.Dir("../../assets")))
 
-	err := http.ListenAndServe("127.0.0.1:8000", nil)
+	err := http.ListenAndServe("0.0.0.0:8000", nil)
 
 	if err != nil {
 		fmt.Println("Server failed to start!")

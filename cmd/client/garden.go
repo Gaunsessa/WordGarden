@@ -28,7 +28,6 @@ func NewGarden(canvas Canvas, ws string) *Garden {
 	}
 
 	msgCb := func(this js.Value, inputs []js.Value) interface{} {
-		fmt.Println(inputs[0].Get("data").String())
 		msg := strings.Split(inputs[0].Get("data").String(), "|")
 		if len(msg) != 3 { return nil }
 
