@@ -81,6 +81,6 @@ func (g *Garden) Update(dt float32) {
 
 func (g *Garden) Render() {
 	for _, c := range g.chars {
-		CANVAS.DrawText(string(c.char), "#FFFFFF" + fmt.Sprintf("%X", int(c.alpha)), c.x, c.y)
+		CANVAS.DrawText(string(c.char), "#e1e1e6" + fmt.Sprintf("%X", int(c.alpha)), c.x, c.y)
 	}
 }

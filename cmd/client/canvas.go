@@ -30,9 +30,7 @@ func NewCanvas(id string) *Canvas {
 }
 
 func (can *Canvas) Clear() {
-	can.ctx.Set("fillStyle", "#000000");
-
-	can.ctx.Call("fillRect", 0, 0, can.width, can.height)
+	can.ctx.Call("clearRect", 0, 0, can.width, can.height)
 }
 
 func (can *Canvas) DrawText(txt, color string, x, y int) {

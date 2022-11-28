@@ -13,11 +13,10 @@ type Player struct {
 	timeout float32
 }
 
-var PORT string
-var IP string
+var WSIP string
 
 var CANVAS = NewCanvas("garden")
-var GARDEN = NewGarden(*CANVAS, "ws://" + IP + ":" + PORT + "/ws")
+var GARDEN = NewGarden(*CANVAS, WSIP)
 var PLAYER = Player{ 
 	x: rand.Int() % CANVAS.width, 
 	y: rand.Int() % CANVAS.height, 
